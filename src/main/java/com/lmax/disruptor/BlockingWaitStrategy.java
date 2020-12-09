@@ -46,6 +46,7 @@ public final class BlockingWaitStrategy implements WaitStrategy
         while ((availableSequence = dependentSequence.get()) < sequence)
         {
             barrier.checkAlert();
+            //自选等待，不让出cpu，而使用sleep则会让出cpu时间，等到就绪去抢占cpu资源会浪费更多时间
             ThreadHints.onSpinWait();
         }
 

@@ -32,7 +32,10 @@ public abstract class AbstractSequencer implements Sequencer
 
     protected final int bufferSize;
     protected final WaitStrategy waitStrategy;
+    //可以认为是生产者的游标或者RingBuffer的游标
     protected final Sequence cursor = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
+
+    //这个数组，用来存放消费者的序列，生产者通过这个数组查询消费者中最小的序列
     protected volatile Sequence[] gatingSequences = new Sequence[0];
 
     /**

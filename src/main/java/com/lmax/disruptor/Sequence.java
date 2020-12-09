@@ -54,6 +54,9 @@ public class Sequence extends RhsPadding
         UNSAFE = Util.getUnsafe();
         try
         {
+            // 获取类的静态字段偏移地址，并将偏移地址赋值给VALUE_OFFSET
+            // 通过putOrderedLong(this, VALUE_OFFSET, initialValue) 这个方法put的时候，
+            // 实际上就是将Sequence对象中偏移地址是VALUE_OFFSET值设置为initialValue，其实就是将Value对象中的value赋值为：initialValue
             VALUE_OFFSET = UNSAFE.objectFieldOffset(Value.class.getDeclaredField("value"));
         }
         catch (final Exception e)
@@ -99,6 +102,8 @@ public class Sequence extends RhsPadding
      */
     public void set(final long value)
     {
+        //将对象this（就是Sequence）中偏移量为VALUE_OFFSET的字段值，设置为initialValue，
+        // 而VALUE_OFFSET偏移量代表的字段值就是Value类中value字段，相当于给Value类中value字段赋值
         UNSAFE.putOrderedLong(this, VALUE_OFFSET, value);
     }
 

@@ -127,11 +127,14 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
         long wrapPoint = nextSequence - bufferSize;
         long cachedGatingSequence = this.cachedValue;
 
+        //生产者的序号是否大于了消费者的最小序号或者消费者最小序号大于了生产者的序号
         if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue)
         {
+            //通过cas设置Sequence的游标（cursor）
             cursor.setVolatile(nextValue);  // StoreLoad fence
 
             long minSequence;
+            //当生产者的序号大于消费者的最小序号时，线程进入阻塞
             while (wrapPoint > (minSequence = Util.getMinimumSequence(gatingSequences, nextValue)))
             {
                 LockSupport.parkNanos(1L); // TODO: Use waitStrategy to spin?

@@ -162,6 +162,7 @@ public final class BatchEventProcessor<T>
                     batchStartAware.onBatchStart(availableSequence - nextSequence + 1);
                 }
 
+                //判断下个序号是否超过得到的序号，消费者序号不能大于了生产者的序号
                 while (nextSequence <= availableSequence)
                 {
                     event = dataProvider.get(nextSequence);

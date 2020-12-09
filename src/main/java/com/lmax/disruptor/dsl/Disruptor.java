@@ -523,6 +523,7 @@ public class Disruptor<T>
     {
         checkNotStarted();
 
+        //消费者的序列，设计的是多个消费者所以会使用数组
         final Sequence[] processorSequences = new Sequence[eventHandlers.length];
         final SequenceBarrier barrier = ringBuffer.newBarrier(barrierSequences);
 

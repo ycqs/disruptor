@@ -33,7 +33,10 @@ import com.lmax.disruptor.util.Util;
 public final class MultiProducerSequencer extends AbstractSequencer
 {
     private static final Unsafe UNSAFE = Util.getUnsafe();
+    //返回数组类型的第一个元素的偏移地址(基础偏移地址)。
+    // 如果arrayIndexScale方法返回的比例因子不为0，可以通过结合基础偏移地址和比例因子访问数组的所有元素
     private static final long BASE = UNSAFE.arrayBaseOffset(int[].class);
+    //返回数组类型的比例因子(其实就是数据中元素偏移地址的增量，因为数组中的元素的地址是连续的)
     private static final long SCALE = UNSAFE.arrayIndexScale(int[].class);
 
     private final Sequence gatingSequenceCache = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
@@ -145,7 +148,6 @@ public final class MultiProducerSequencer extends AbstractSequencer
             }
         }
         while (true);
-
         return next;
     }
 
@@ -257,6 +259,7 @@ public final class MultiProducerSequencer extends AbstractSequencer
 
     private void setAvailableBufferValue(int index, int flag)
     {
+        //availableBuffer为ringbuffer槽的追踪数组，当发布一个序号是，相应的availableBuffer对应的位置就会打标记，就是这个位置就绪了
         long bufferAddress = (index * SCALE) + BASE;
         UNSAFE.putOrderedInt(availableBuffer, bufferAddress, flag);
     }
@@ -267,9 +270,16 @@ public final class MultiProducerSequencer extends AbstractSequencer
     @Override
     public boolean isAvailable(long sequence)
     {
+        //计算出ringbuffer槽的索引
         int index = calculateIndex(sequence);
+
+        //根据给定的序列号通过位移计算出一个数值
         int flag = calculateAvailabilityFlag(sequence);
+
+        //通过ringbuffer槽的索引计算出availableBuffer的物理内存地址
         long bufferAddress = (index * SCALE) + BASE;
+
+        //通过物理内存地址获取availableBuffer数组中的值和flag进行比较
         return UNSAFE.getIntVolatile(availableBuffer, bufferAddress) == flag;
     }
 
